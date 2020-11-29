@@ -1,8 +1,12 @@
-from app import db
 import uuid
 import datetime
+
+from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy import String, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID
+from app.database import Base
 
 
 class GUID(TypeDecorator):
@@ -41,49 +45,51 @@ class GUID(TypeDecorator):
             return value
 
 
-class UserProfile(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship("User", back_populates="profile")
+class UserProfile(Base):
+    __tablename__ = 'user_profile'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship("User", back_populates="profile")
 
-    characters = db.relationship('Character', backref='player', lazy='dynamic')
-    campaigns = db.relationship('Campaign', backref='owner', lazy='dynamic')
+    characters = relationship('Character', backref='player', lazy='dynamic')
+    campaigns = relationship('Campaign', backref='owner', lazy='dynamic')
 
     def __repr__(self):
         return f'<UserProfile {self.user_id}>'
 
 
-class Invite(db.Model):
-    id = db.Column(GUID(), primary_key=True, default=uuid.uuid4)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user_profile.id'))
-    table = db.Column(db.String(128))
-    object_id = db.Column(db.Integer)
+class Invite(Base):
+    __tablename__ = 'invite'
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(Integer, ForeignKey('user_profile.id'))
+    table = Column(String(128))
+    object_id = Column(Integer)
 
-    def __init__(self, target: db.Model, **kwargs):
+    def __init__(self, target: Base, **kwargs):
         super(Invite, self).__init__(**kwargs)
         self.table = target.__tablename__
         self.object_id = target.id
 
     @classmethod
-    def query_for(cls, target: db.Model):
+    def query_for(cls, target: Base):
         return cls.query.filter_by(object_id=target.id) \
                         .filter_by(table=target.__tablename__)
 
-    def matches(self, target: db.Model):
+    def matches(self, target: Base):
         return target.__tablename__ == self.table and target.id == self.object_id
 
 
-class LogEntry(db.Model):
+class LogEntry(Base):
     __tablename__ = 'eventlog'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    table = db.Column(db.String(128))
-    object_id = db.Column(db.Integer)
-    entry = db.Column(db.Text)
-    created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    user = db.relationship("User")
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    table = Column(String(128))
+    object_id = Column(Integer)
+    entry = Column(Text)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+    user = relationship("User")
 
-    def __init__(self, target: db.Model, entry: str, user_id=None, **kwargs):
+    def __init__(self, target: Base, entry: str, user_id=None, **kwargs):
         super(LogEntry, self).__init__(**kwargs)
         self.table = target.__tablename__
         self.object_id = target.id
@@ -92,7 +98,7 @@ class LogEntry(db.Model):
             self.user_id = user_id
 
     @classmethod
-    def query_for(cls, target: db.Model):
+    def query_for(cls, target: Base):
         return cls.query.filter_by(object_id=target.id) \
                         .filter_by(table=target.__tablename__) \
                         .order_by(LogEntry.created_date.desc())

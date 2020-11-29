@@ -7,7 +7,6 @@ import logging
 
 import markdown2
 
-from app import db
 from . import bp
 
 from .models import Campaign, Handout, HandoutGroup

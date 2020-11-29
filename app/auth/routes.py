@@ -8,8 +8,6 @@ from .forms import LoginForm, RegistrationForm
 from .forms import ResetPasswordRequestForm, ResetPasswordForm
 from .models import User
 
-from app import db
-
 
 from . import bp, send_password_reset_email
 

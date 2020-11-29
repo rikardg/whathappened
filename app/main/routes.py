@@ -6,7 +6,7 @@ from flask_login import current_user
 from flask_login.utils import login_required
 from werkzeug.exceptions import abort
 
-from app import db
+from app.database import Base
 from app.models import Invite
 
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_class_by_tablename(tablename):
-    for c in db.Model._decl_class_registry.values():
+    for c in Base._decl_class_registry.values():
         if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
             return c
 

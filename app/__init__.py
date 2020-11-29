@@ -3,7 +3,6 @@ import os
 
 from flask import Flask
 from sqlalchemy import MetaData
-from flask_sqlalchemy import SQLAlchemy
 
 from sqlalchemy.ext.declarative import declarative_base
 from flask_assets import Environment, Bundle
@@ -27,8 +26,7 @@ convention = {
 }
 
 sql_alchemy_metadata = MetaData(naming_convention=convention)
-db = SQLAlchemy(metadata=sql_alchemy_metadata)
-migrate = Migrate()
+# migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 mail = Mail()

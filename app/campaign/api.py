@@ -3,8 +3,6 @@ from flask_login import current_user
 from werkzeug.exceptions import abort
 import logging
 
-from app import db
-
 from . import apibp
 from .models import Handout
 

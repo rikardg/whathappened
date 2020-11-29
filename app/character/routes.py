@@ -15,7 +15,6 @@ from .models import Character
 from .forms import ImportForm, CreateForm, SkillForm
 from .forms import SubskillForm, DeleteForm
 from .coc import convert_from_dholes
-from app import db
 from app.models import LogEntry
 from app.utils.schema import migrate
 from app.models import Invite

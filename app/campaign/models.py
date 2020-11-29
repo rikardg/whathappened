@@ -1,49 +1,55 @@
 import enum
-from app import db
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, Text
+from sqlalchemy import Enum
+from sqlalchemy.orm import relationship, backref
+from app.database import Base
 
 
-campaign_players = db.Table('campaign_players',
-                            db.Column('player_id',
-                                      db.Integer,
-                                      db.ForeignKey('user_profile.id'),
+campaign_players = Table('campaign_players',
+                            Base.metadata,
+                            Column('player_id',
+                                      Integer,
+                                      ForeignKey('user_profile.id'),
                                       primary_key=True),
-                            db.Column('campaign_id',
-                                      db.Integer,
-                                      db.ForeignKey('campaign.id'),
+                            Column('campaign_id',
+                                      Integer,
+                                      ForeignKey('campaign.id'),
                                       primary_key=True))
 
-campaign_characters = db.Table('campaign_characters',
-                               db.Column('character_id',
-                                         db.Integer,
-                                         db.ForeignKey('charactersheet.id'),
+campaign_characters = Table('campaign_characters',
+                            Base.metadata,
+                               Column('character_id',
+                                         Integer,
+                                         ForeignKey('charactersheet.id'),
                                          primary_key=True),
-                               db.Column('campaign_id',
-                                         db.Integer,
-                                         db.ForeignKey('campaign.id'),
+                               Column('campaign_id',
+                                         Integer,
+                                         ForeignKey('campaign.id'),
                                          primary_key=True))
 
 
-class Campaign(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(256))
-    description = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user_profile.id'))
-    user = db.relationship("UserProfile", back_populates='campaigns')
-    players = db.relationship('UserProfile',
+class Campaign(Base):
+    __tablename__ = 'campaign'
+    id = Column(Integer, primary_key=True)
+    title = Column(String(256))
+    description = Column(Text)
+    user_id = Column(Integer, ForeignKey('user_profile.id'))
+    user = relationship("UserProfile", back_populates='campaigns')
+    players = relationship('UserProfile',
                               secondary=campaign_players,
                               lazy='dynamic',
-                              backref=db.backref('campaigns_as_player',
+                              backref=backref('campaigns_as_player',
                                                  lazy=True))
-    characters = db.relationship('Character',
+    characters = relationship('Character',
                                  secondary=campaign_characters,
                                  lazy='dynamic',
-                                 backref=db.backref('campaigns', lazy=True))
+                                 backref=backref('campaigns', lazy=True))
 
-    handouts = db.relationship("Handout",
+    handouts = relationship("Handout",
                                back_populates='campaign',
                                lazy='dynamic')
 
-    handout_groups = db.relationship("HandoutGroup",
+    handout_groups = relationship("HandoutGroup",
                                      back_populates='campaign',
                                      lazy='dynamic')
 
@@ -55,14 +61,15 @@ class Campaign(db.Model):
         return '<Campaign {}>'.format(self.title)
 
 
-player_handouts = db.Table('campaign_handouts_to_players',
-                           db.Column('handout_id',
-                                     db.Integer,
-                                     db.ForeignKey('campaign_handout.id'),
+player_handouts = Table('campaign_handouts_to_players',
+                            Base.metadata,
+                           Column('handout_id',
+                                     Integer,
+                                     ForeignKey('campaign_handout.id'),
                                      primary_key=True),
-                           db.Column('player_id',
-                                     db.Integer,
-                                     db.ForeignKey('user_profile.id'),
+                           Column('player_id',
+                                     Integer,
+                                     ForeignKey('user_profile.id'),
                                      primary_key=True))
 
 
@@ -73,13 +80,13 @@ class HandoutStatus(enum.Enum):
     visible = "Visible"
 
 
-class HandoutGroup(db.Model):
+class HandoutGroup(Base):
     __tablename__ = 'campaign_handout_group'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256))
-    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'))
-    campaign = db.relationship("Campaign", back_populates='handout_groups')
-    handouts = db.relationship('Handout',
+    id = Column(Integer, primary_key=True)
+    name = Column(String(256))
+    campaign_id = Column(Integer, ForeignKey('campaign.id'))
+    campaign = relationship("Campaign", back_populates='handout_groups')
+    handouts = relationship('Handout',
                                lazy='dynamic',
                                back_populates='group')
 
@@ -87,28 +94,28 @@ class HandoutGroup(db.Model):
         return f'<Handout Group {self.name}>'
 
 
-class Handout(db.Model):
+class Handout(Base):
     __tablename__ = 'campaign_handout'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(256))
-    content = db.Column(db.Text)
-    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'))
-    campaign = db.relationship("Campaign", back_populates='handouts')
-    status = db.Column('status',
-                       db.Enum(HandoutStatus),
+    id = Column(Integer, primary_key=True)
+    title = Column(String(256))
+    content = Column(Text)
+    campaign_id = Column(Integer, ForeignKey('campaign.id'))
+    campaign = relationship("Campaign", back_populates='handouts')
+    status = Column('status',
+                       Enum(HandoutStatus),
                        default=HandoutStatus.draft)
 
-    players = db.relationship('UserProfile',
+    players = relationship('UserProfile',
                               secondary=player_handouts,
                               lazy='dynamic',
-                              backref=db.backref('campaign_handouts',
+                              backref=backref('campaign_handouts',
                                                  lazy=True))
 
-    group_id = db.Column(db.Integer,
-                         db.ForeignKey('campaign_handout_group.id'),
+    group_id = Column(Integer,
+                         ForeignKey('campaign_handout_group.id'),
                          name="group_id")
 
-    group = db.relationship('HandoutGroup')
+    group = relationship('HandoutGroup')
 
     def __repr__(self):
         return '<Handout {}>'.format(self.title)

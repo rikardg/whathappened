@@ -3,7 +3,6 @@ from flask import (
     Blueprint, render_template
 )
 from flask_login import login_required, current_user
-from app import db
 
 bp = Blueprint('profile', __name__, template_folder='templates')
 
@@ -20,8 +19,8 @@ def index():
 
     if user_profile is None:
         user_profile = UserProfile(user_id=current_user.id)
-        db.session.add(user_profile)
-        db.session.commit()
+        session.add(user_profile)
+        session.commit()
 
     logger.info(f"Showing profile {user_profile.id}")
 

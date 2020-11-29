@@ -4,24 +4,27 @@ import jwt
 from flask_login import UserMixin
 from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.event import listen
+from sqlalchemy.orm import relationship
 
-from app import db
+from app.database import Base
 
 logger = logging.getLogger(__name__)
 
 
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(128), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
+class User(UserMixin, Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(64), index=True, unique=True)
+    email = Column(String(128), index=True, unique=True)
+    password_hash = Column(String(128))
 
-    profile = db.relationship('UserProfile', uselist=False,
-                              back_populates="user")
+    profile = relationship('UserProfile',
+                           uselist=False,
+                           back_populates="user")
 
-    roles = db.relationship('Role', secondary='user_roles')
+    roles = relationship('Role', secondary='user_roles')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -56,32 +59,32 @@ class User(UserMixin, db.Model):
         return False
 
 
-class Role(db.Model):
+class Role(Base):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(50), unique=True)
 
 
-class UserRoles(db.Model):
+class UserRoles(Base):
     __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(),
-                        db.ForeignKey('user.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(),
-                        db.ForeignKey('roles.id', ondelete='CASCADE'))
+    id = Column(Integer(), primary_key=True)
+    user_id = Column(Integer(),
+                     ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = Column(Integer(),
+                     ForeignKey('roles.id', ondelete='CASCADE'))
 
 
 def create_core_roles(*args, **kwargs):
-    db.session.add(Role(name='admin'))
-    db.session.commit()
+    session.add(Role(name='admin'))
+    session.commit()
 
 
 listen(Role.__table__, 'after_create', create_core_roles)
 
 
 def add_first_admin(*args, **kwargs):
-    db.session.add(UserRoles(user_id=1, role_id=1))
-    db.session.commit()
+    session.add(UserRoles(user_id=1, role_id=1))
+    session.commit()
 
 
 listen(UserRoles.__table__, 'after_create', add_first_admin)

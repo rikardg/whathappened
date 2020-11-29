@@ -3,13 +3,13 @@ import logging
 from functools import reduce
 from jsonschema import Draft7Validator
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, JSON
 from datetime import datetime
 import base64
 import io
 from PIL import Image
 
-from app import db
-
+from app.database import Base
 from app.character.coc import schema_file, load_schema
 
 logger = logging.getLogger(__name__)
@@ -26,13 +26,13 @@ def fix_image(imagedata: str) -> str:
     return base64.b64encode(buf.getvalue()).decode('utf-8')
 
 
-class Character(db.Model):
+class Character(Base):
     __tablename__ = 'charactersheet'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(256))
-    body = db.Column(db.JSON)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user_profile.id'))
+    id = Column(Integer, primary_key=True)
+    title = Column(String(256))
+    body = Column(JSON)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
+    user_id = Column(Integer, ForeignKey('user_profile.id'))
 
     def __repr__(self):
         return '<Character {}>'.format(self.title)

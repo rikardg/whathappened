@@ -8,7 +8,6 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import abort
 
-from app import db
 from . import bp
 from .forms import DeleteAssetFolderForm, DeleteAssetForm
 from .forms import UploadForm, NewFolderForm, MoveAssetForm
