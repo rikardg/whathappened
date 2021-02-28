@@ -10,7 +10,7 @@ def test_config(app):
     assert not a.testing
 
     assets._named_bundles = {}
-    
+
     a = create_app(Config)
     assert a.testing
 
@@ -18,3 +18,7 @@ def test_config(app):
 def test_hello(client):
     response = client.get('/hello')
     assert response.data == b'Hello, World!'
+
+
+def test_initial(app):
+    assert app.testing

@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from sqlalchemy.engine import create_engine
 from app import create_app, assets
 from app.database import db as _db
 
@@ -16,7 +17,16 @@ class Conf(Config):
     WTF_CSRF_ENABLED = False
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="function")
+def connection():
+    engine = create_engine(
+        Conf.SQLALCHEMY_DATABASE_URI
+    )
+
+    return engine.connect()
+
+
+@pytest.fixture(scope='function')
 def app(request):
     assets._named_bundles = {}
     app = create_app(Conf)
@@ -32,7 +42,7 @@ def app(request):
     return app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def db(app, request):
     """Session-wide test database."""
     if os.path.exists(Conf.TESTDB):
@@ -42,6 +52,8 @@ def db(app, request):
         _db.drop_all()
         if os.path.isfile(Conf.TESTDB):
             os.unlink(Conf.TESTDB)
+        if os.path.isfile(Conf.TESTDB):
+            raise Exception("WTF!")
 
     _db.create_all()
 
