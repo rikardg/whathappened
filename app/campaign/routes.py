@@ -16,6 +16,7 @@ from .models import HandoutStatus, NPC, Message
 from app.models import Invite
 from sqlalchemy import and_, or_
 from app.database import session
+from app import socketio
 
 from . import api  # noqa
 
@@ -319,3 +320,10 @@ def message_player(campaign_id: int, player_id: int = None):
                            campaign=c,
                            form=form,
                            messages=messages)
+
+
+@socketio.on('message')
+def handle_message(data):
+    print("Got some!")
+    print(data)
+    socketio.send("Here's a response")
