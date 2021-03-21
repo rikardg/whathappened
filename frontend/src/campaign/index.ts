@@ -1,4 +1,4 @@
-import { get_meta_tag, http } from "../common"
+import { get_meta_tag, http, whisperstone } from "../common"
 
 function set_handout_state(player_id: number, campaign_id: number, handout_id: number, state: boolean) {
     const url = `/api/campaign/${campaign_id}/handout/${handout_id}/players`;
@@ -221,4 +221,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     init_npc_control();
     init_npc_refresh();
     // init_message_refresh(window.wh_campaign.id);
+    whisperstone.add_recipient('update', (message: string) => {
+        console.log("This is the recipient getting the message");
+        console.log(message);
+    })
 })

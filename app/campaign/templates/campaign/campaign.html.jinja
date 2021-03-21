@@ -74,24 +74,6 @@
 </section>
 {% endif %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js" integrity="sha512-2RDFHqfLZW8IhPRvQYmK9bTLfj/hddxGXQAred2wNZGkrKQkLGj8RCkXfRJPHlDerdHHIzTFaahq4s/P4V6Qig==" crossorigin="anonymous"></script>
-<form action="" method="POST">
-    <input type="text" />
-    <input type="submit" />
-</form>
-<script type="text/javascript">
-    var socket = io();
-    socket.on('connect', function() {
-        console.log("I am connected!");
-        socket.send('Hello');
-    });
-
-    socket.on("message", data => {
-        console.log("Got a response");
-        console.log(data);
-    })
-</script>
-
 <div class="splitcontainer">
 {% if campaign.handouts_enabled %}
 {% include 'campaign/campaign_handouts.html.jinja' %}
