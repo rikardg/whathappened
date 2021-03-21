@@ -326,4 +326,4 @@ def message_player(campaign_id: int, player_id: int = None):
 def handle_message(data):
     print("Got some!")
     print(data)
-    socketio.send("update")
+    socketio.emit("update", {'message': "There are new messages"})

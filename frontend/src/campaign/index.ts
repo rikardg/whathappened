@@ -221,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     init_npc_control();
     init_npc_refresh();
     // init_message_refresh(window.wh_campaign.id);
-    whisperstone.add_recipient('update', (message: string) => {
+    whisperstone.add_recipient('update', (...args: any[]) => {
         console.log("This is the recipient getting the message");
-        console.log(message);
+        console.log(args);
     })
 })

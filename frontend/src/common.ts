@@ -274,7 +274,7 @@ export async function http<T>(request: RequestInfo): Promise<T> {
 }
 
 
-export type Recipient = (message: string) => void
+export type Recipient = (message: string, ...data: any[]) => void
 class WhisperStone {
     socket: Socket
 
@@ -297,7 +297,8 @@ class WhisperStone {
     }
 
     add_recipient(message: string, recipient: Recipient) {
-        this.responders[message] = recipient;
+        //this.responders[message] = recipient;
+        this.socket.on(message, recipient);
     }
 
 
